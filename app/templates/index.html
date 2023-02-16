@@ -43,6 +43,9 @@
 </head>
 
 <body>
+<div>
+
+</div>
 <div id="map"></div>
 </body>
 
@@ -73,13 +76,27 @@ ymaps.ready(init);
             id:"Достопримнчательность",
             content: '<p>ПИДАРАСfefefe</p>'
         }
+    ]
+    
+
+    var places = [
+
+    {% for place in places %}
+        {
+            center: [{{ place.coordinates }}],
+            name: "{{ place.name }}"
+
+        }, 
+    {% endfor %}
 
     ]
 
-   var lengthGroups = all_places.length
-    for (var i = 0; i < lengthGroups; i++ ) {
-        myMap.geoObjects.add(new ymaps.Placemark(all_places[i].center, {
-                balloonContent: all_places[i].content
+    
+
+    var length_places = places.length
+    for (var i = 0; i < length_places; i++ ) {
+        myMap.geoObjects.add(new ymaps.Placemark(places[i].center, {
+                balloonContent: places[i].name
             }, {
                 preset: "islands#blueIcon",
                 iconColor: '#735184'        
@@ -91,8 +108,11 @@ ymaps.ready(init);
             provider: 'yandex#search'
         }
     });
-    
+
+    console.log(places_all)
     myMap.controls.add(searchControl)
+    
+    
 };
 
 
