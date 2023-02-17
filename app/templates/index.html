@@ -129,30 +129,43 @@ ymaps.ready(init);
     // проверяет чекбоксы на чекд и если чекбокс чекд то добавляет i в список
     function checking_checkbox() {
         checks = document.getElementsByClassName('Check')
-        var id_labels = []
+        var id_labels = new Array()
         for (i=0; i < checks.length; i++) {
             if (checks[i].checked) {
                 id_labels.push(i)
             }
         }
-        console.log(id_labels)
-        return id_labels
+        var a = id_labels
+
+        return a
     }
-
-    document.getElementById("buttonCheck").onclick = getting_places_names;
-
-
-
-    // получение списка из названий достопримечательностей
     function getting_places_names(id_list) { 
        var options_of_places =  document.getElementById("options").children
        var marks_names = []
        for (i=0; i < id_list.length; i++) {
             var id = id_list[i]
-            marks_names.push(options_of_places[id].innerHTML.slice(37,options_of_places[i].innerHTML.length ))
+            marks_names.push(options_of_places[id].innerHTML.slice(37, options_of_places[i].innerHTML.length ))
        }
        return marks_names
     }
+
+    function f () {
+        var k = checking_checkbox()
+        var j = getting_places_names(k)
+        console.log(j)
+    }
+
+
+
+
+    document.getElementById("buttonCheck").onclick = f
+    
+    
+
+
+
+    // получение списка из названий достопримечательностей
+    
     
 
     // создание метки на карте
