@@ -10,8 +10,7 @@
     -->
     <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&amp;apikey=1ea85255-8e81-4263-bdfe-49858c26b6d4" type="text/javascript"></script>
     <script src="https://yandex.st/jquery/2.2.3/jquery.min.js" type="text/javascript"></script>
-    <script src="groups.js" type="text/javascript"></script>
-    <script src="object_list.js" type="text/javascript"></script>
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.15.24/dist/css/uikit.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/uikit@3.15.24/dist/js/uikit.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/uikit@3.15.24/dist/js/uikit-icons.min.js"></script>
@@ -103,7 +102,8 @@
 
 <script>
 
-ymaps.ready(init);
+    
+
 
     function init() {
 
@@ -125,6 +125,7 @@ ymaps.ready(init);
     {% endfor %}
 
     ]
+
 
     // проверяет чекбоксы на чекд и если чекбокс чекд то добавляет i в список
     function checking_checkbox() {
@@ -167,31 +168,28 @@ ymaps.ready(init);
     // получение списка из названий достопримечательностей
     
     
-
-    // создание метки на карте
-    function creatingMark (center_mark, name_mark, options, color) {
-        myMap.geoObjects.add(new ymaps.Placemark(center_mark,
-            {balloonContent: name_mark},
-            {preset: options,
-             iconColor: color
-            }        
-        ))
-    }
-
-    // создание маршрута
-    function creatingRoute (points) {
-        /**
-         * Создаем мультимаршрут.
-         * @see https://api.yandex.ru/maps/doc/jsapi/2.1/ref/reference/multiRouter.MultiRoute.xml
-         */
-        multiRoute = new ymaos.multiRouter.MultiRoute ({
-            referencePoints : points, // points[0] - начальная точка, points[points.lenght] - конечная
+    function route(pointA, pointB) {
+        // Задаём точки мультимаршрута.
+        // var pointA = [55.749, 37.524],
+        //     pointB = [55.649, 37.424],
+        
+        multiRoute = new ymaps.multiRouter.MultiRoute({
+            referencePoints: [
+                pointA,
+                pointB
+            ],
             params: {
+                //Тип маршрутизации - пешеходная маршрутизация.
                 routingMode: 'pedestrian'
             }
-        })
-        myMap.geoObjects.add(multiRoute)
-                      
+        }, {
+            // Автоматически устанавливать границы карты так, чтобы маршрут был виден целиком.
+            boundsAutoApply: true
+        });
+
+
+        // Добавляем мультимаршрут на карту.
+        myMap.geoObjects.add(multiRoute);
     }
 
     
@@ -206,6 +204,9 @@ ymaps.ready(init);
 // 4. Создать в бд еще одну таблицу с маршрутами
 
     
+
+ymaps.ready(init);
+
 
         
 
