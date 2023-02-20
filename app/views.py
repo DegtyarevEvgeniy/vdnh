@@ -7,7 +7,10 @@ content = {}
 
 def index_page(request):
     places = Place.objects.all()
+    history = History.objects.all()
     content['places'] = [place for place in places]
+    content['items'] = history
+
 
     return render(request, 'index.html', content)
 

@@ -102,21 +102,18 @@
                         </thead>
 
                         <tbody>
+                            {% for item in items %}
                             <tr>
-                                <td>0</td>
-                                <td>Павилион №2 Робостанция, Павилион №10 Молдова</td>
-                                <td>6 мин</td>
-                                <td>520 м</td>
+                                <td>{{item.id}}</td>
+                                <td>{{item.points}}</td>
+                                <td>{{item.time}}</td>
+                                <td>{{item.distance}}</td>
                                 <td><input class="oldRoutes" type="checkbox"></td>
                             </tr>
 
-                            <tr>
-                                <td>1</td>
-                                <td>Павильон № 5 Музей городского хозяйства Москвы, Павильон №6 «Абхазия»</td>
-                                <td>7 мин</td>
-                                <td>560 м</td>
-                                <td><input class="oldRoutes" type="checkbox"></td>
-                            </tr>
+
+                            {% endfor %}
+
                         </tbody>
                     </table>
                 </div>
