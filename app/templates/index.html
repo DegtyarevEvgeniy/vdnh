@@ -10,7 +10,8 @@
     -->
     <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&amp;apikey=1ea85255-8e81-4263-bdfe-49858c26b6d4" type="text/javascript"></script>
     <script src="https://yandex.st/jquery/2.2.3/jquery.min.js" type="text/javascript"></script>
-
+    <script src="groups.js" type="text/javascript"></script>
+    <script src="object_list.js" type="text/javascript"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.15.24/dist/css/uikit.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/uikit@3.15.24/dist/js/uikit.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/uikit@3.15.24/dist/js/uikit-icons.min.js"></script>
@@ -26,16 +27,15 @@
         }
 
         .menu {
-            width: 30%;
-            height: 70vh;
-            background-color: white;
             position: absolute;
             z-index: 2;
-            right: 0
+            left: 10px;
+            top: 10px
 
         }
         p {
             margin: 0;
+            color: black  
         }
         </style>
 
@@ -47,11 +47,9 @@
 </div>
 <div id="map" style="position: relative;">
     <div class="menu">
-        <p style="text-align: center; font-size: 3em">Меню пути</p>
-        <div style="width: 80%; margin: auto;">
-            <p style="font-size: 1.5em">Выберете точки для маршрута</p>
+        <div style="">
             <div>
-                <a href="#" class="uk-button uk-button-secondary">Нажмите, чтобы выбрать точки</a>
+                <button href="#" style="background-color: white; border-radius: 0.5em; width: 100%; height: 4vh; border: 0px;">Нажмите, чтобы выбрать точки</button>
                 <div id="options" class="uk-dropbar uk-dropbar-top uk-flex-column" uk-drop=" mode: click" style="width:100%; height: 40vh">
                     {% for place in places %}
                         <label style="display: block; font-size: 1.5em"><input class="Check" type="checkbox">{{ place.name }}</label>
@@ -59,75 +57,39 @@
                 </div>
             </div>
         </div>
-
-        <div style="width: 80%; margin: 5% auto;">
-            <p style="font-size: 1.5em">Укажите начальную точку</p>
-            <a href="#" class="uk-button uk-button-secondary">Нажмите, чтобы выбрать точку</a>
-            <div id="options" class="uk-dropbar uk-dropbar-top uk-flex-column" uk-drop=" mode: click" style="width:100%; height: 40vh">
-                {% for place in places %}
-                    <label style="display: block; font-size: 1.5em"><input class="Check" type="checkbox"> {{ place.name }} </label>
-                {% endfor %}
-            </div>
-        </div>
-
-        <div style="width: 80%; margin: auto;">
-            <p style="font-size: 1.5em">Укажите ограничение по времени (если оно есть)</p>
-            <div>
-                <input class="uk-input" style="width: 15%" type="text" placeholder="часы" aria-label="Input">
-                <input class="uk-input" style="width: 15%" type="text" placeholder="минуты" aria-label="Input">
-                <input class="uk-input" style="width: 15%" type="text" placeholder="секунды" aria-label="Input">
-            </div>
-        </div>
-        <div style="width: 80%; margin: 5% auto;">
-            <p style="font-size: 1.5em">Ваш маршрут будет проходить через точки:</p>
-            <div class="uk-flex">
-                <div style="margin: 2%">
-                    <p style="font-size: 1em">Павильон 2;</p>  
-                </div>
-                <div style="margin: 2%">
-                    <p style="font-size: 1em">Павильон 2;</p>  
-                </div>
-                <div style="margin: 2%">
-                    <p style="font-size: 1em">Павильон 2;</p>  
-                </div>
-            </div>
-        </div>
-        <div style="position: absolute; bottom: 5%; width: 70%;">
-            <button class="uk-button uk-button-secondary" id="buttonCheck"  style="width: 100%; height: 4vh; margin-left: 20%;" >Построить маршрут</button>
-        </div>
-
     </div> 
+    <div style="position: absolute; right: 10px; top: 10px; z-index: 2; background-color: white; border-radius: 0.5em; width: 30%">
+        <div style="margin: 5px">
+            <p>Информация о маршруте:</p>
+            <p>Точки: <p id="marks"></p></p>
+            <p>Время: <p id="time_html"></p></p>
+            <p>Расстояние: <p id="distance_html"></p></p>
+        </div>
+    </div>
+
 </div>
 </body>
 
 <script>
 
-    
-
+ymaps.ready(init);
 
     function init() {
 
-    var myMap = new ymaps.Map('map', {
-            center: [55.829564, 37.632180],
-            zoom: 14,
-            controls: []
-        },)
+    // массив всех достопримечательностей    
+    var places_bd = [
 
-    // все точки интереса находящиеся в бд
-    var places = [
-
-    {% for place in places %}
+        {% for place in places %}
         {
             center: [{{ place.coordinates }}],
             name: "{{ place.name }}"
 
         }, 
-    {% endfor %}
+        {% endfor %}
 
-    ]
+    ]    
 
-
-    // проверяет чекбоксы на чекд и если чекбокс чекд то добавляет i в список
+    // проверка чекбоксов, чтобы определить выбранные для посещения достопримечательности (возвращает список из id чекбоксов)
     function checking_checkbox() {
         checks = document.getElementsByClassName('Check')
         var id_labels = new Array()
@@ -137,42 +99,53 @@
             }
         }
         var a = id_labels
-
         return a
     }
+
+    // возвращает имена выбранных достопримечательностей
     function getting_places_names(id_list) { 
        var options_of_places =  document.getElementById("options").children
+
+       console.log(options_of_places)
        var marks_names = []
        for (i=0; i < id_list.length; i++) {
             var id = id_list[i]
-            marks_names.push(options_of_places[id].innerHTML.slice(37, options_of_places[i].innerHTML.length ))
+            marks_names.push(options_of_places[id].innerHTML.slice(37, options_of_places[id].innerHTML.length ))
        }
+       console.log(marks_names)
+
        return marks_names
+
     }
 
-    function f () {
-        var k = checking_checkbox()
-        var j = getting_places_names(k)
-        console.log(j)
-    }
+    // возвращает координаты выбранных достопримечательностей
+    function getting_coordinates(names, places) {
+        var len_places = places.length
+        var placemarks_names = []
+ 
+        for (i=0; i < names.length; i++) {
+            for (j = 0; j < len_places; j++) {
 
+                if (names[i] == places[j].name) {
+                    placemarks_names.push(places[j])
+                }
+            }
 
+        }
 
+        var coordinates = []
+        for (k = 0; k < placemarks_names.length; k++) {
+            coordinates.push(placemarks_names[k].center)
 
-    document.getElementById("buttonCheck").onclick = f
-    
-    
+        }
 
-
-
-    // получение списка из названий достопримечательностей
-    
-    
-    function route(pointA, pointB) {
-        // Задаём точки мультимаршрута.
-        // var pointA = [55.749, 37.524],
-        //     pointB = [55.649, 37.424],
+        return coordinates
         
+    }
+    
+    // создание стартового маршрута
+    var pointA = [55.828693, 37.633724],
+        pointB = [55.828693, 37.633724],
         multiRoute = new ymaps.multiRouter.MultiRoute({
             referencePoints: [
                 pointA,
@@ -187,23 +160,71 @@
             boundsAutoApply: true
         });
 
+    // кнопка построения маршрута
+    var get_route = new ymaps.control.Button({
+        data: {content: "Построить маршрут"},
+        options: {selectOnClick: true,
+            position: {top: '50px', left: '10px' }
+        }
+    });
 
-        // Добавляем мультимаршрут на карту.
-        myMap.geoObjects.add(multiRoute);
+    // построение маршрута и получение информации
+    get_route.events.add('click', function () {
+        var a = checking_checkbox()
+        var b = getting_places_names(a)
+        // j - список координат
+        var j = getting_coordinates(b, places_bd)
+        document.getElementById('marks').innerHTML = b
+        multiRoute.model.setReferencePoints(j);
+
+        multiRoute.model.events.add('requestsuccess', function() {
+        var activeRoute = multiRoute.getActiveRoute();
+
+        // время пути
+        var route_distance = activeRoute.properties.get("distance").text
+        document.getElementById("distance_html").innerHTML = route_distance 
+        
+        // дистанция
+        var route_duration = activeRoute.properties.get("duration").text
+        document.getElementById("time_html").innerHTML = route_duration
+
+        console.log("Длина: " + activeRoute.properties.get("distance").text);
+        console.log("Время прохождения: " + activeRoute.properties.get("duration").text);
+
+    });});
+
+
+    // создание карты
+    var myMap = new ymaps.Map('map', {
+        center: [55.739625, 37.54120],
+        zoom: 12,
+        controls: [get_route]
+    }, {
+        buttonMaxWidth: 300
+    });
+
+    // размещение маршрута на карте
+    myMap.geoObjects.add(multiRoute);
+
+    // размещение меток достопримечательностей
+    for (i = 0; i < places_bd.length; i++) {
+        myMap.geoObjects
+        .add(new ymaps.Placemark(places_bd[i].center, {
+            balloonContent: places_bd[i].name
+        }, {
+            preset: 'islands#icon',
+            iconColor: '#0095b6'
+        }))    
     }
 
-    
-    
-};
-// нужно сделать:
-// 1.Считывать чекбоксы с checked и по ним строить маршрут(готово)
-// Например, по тому, что написано в теге <label> искать элемент в places(все точки интереса) и оттуда получать остальные данные
-// 2. Определение по времени (динамический маршрут отображается по времени, имеется начальная точка и время, нужно определить какие маршруты подходят под условия)
-// 3. Пользователь должен записывать в бд маршрут, то есть стоит (наверное) сделать кнопку "выбрать из уже построенных маршрутов"
-// При нажатии на нее будут выводиться точки и время
-// 4. Создать в бд еще одну таблицу с маршрутами
+     
 
+        
+
+
+}
     
+
 
 ymaps.ready(init);
 
