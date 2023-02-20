@@ -32,7 +32,8 @@
             position: absolute;
             z-index: 2;
             left: 10px;
-            top: 10px
+            top: 10px;
+            width: 90%;
 
         }
         p {
@@ -49,27 +50,83 @@
 </div>
 <div id="map" style="position: relative;">
     <div class="menu">
-        <div style="">
+        <div style="width: 30%">
             <div>
-                <button href="#" style="background-color: white; border-radius: 0.5em; width: 100%; height: 4vh; border: 0px;">Нажмите, чтобы выбрать точки</button>
-                <div id="options" class="uk-dropbar uk-dropbar-top uk-flex-column" uk-drop=" mode: click" style="width:100%; height: 40vh">
+                <button href="#" style="background-color: white; border-radius: 0.5em; width: 90%; height: 4vh; border: 0px;">Нажмите, чтобы выбрать точки</button>
+                <div id="options" class="uk-dropbar uk-dropbar-top uk-flex-column" uk-drop=" mode: click" style="width:30%; height: 60vh">
                     {% for place in places %}
-                        <label style="display: block; font-size: 1.5em"><input class="Check" type="checkbox">{{ place.name }}</label>
+                        <label style="display: block; font-size: 1em"><input class="Check" type="checkbox">{{ place.name }}</label>
                     {% endfor %}
                 </div>
             </div>
         </div>
     </div> 
-    <div style="position: absolute; right: 10px; top: 10px; z-index: 2; background-color: white; border-radius: 0.5em; width: 30%">
-        <div style="margin: 5px">
-            <p>Информация о маршруте:</p>
-            <p>Точки: <p id="marks"></p></p>
-            <p>Время: <p id="time_html"></p></p>
-            <p>Расстояние: <p id="distance_html"></p></p>
+    
+    <div style="position: absolute; right: 10px; top: 10px; z-index: 2; width: 30%;">
+        <div style="background-color: white; border-radius: 0.5em; width: 100%">
+            <div style="margin: 5px">
+                <p style = "font-size: 1.1em;">Информация о маршруте:</p>
+                <div class="uk-flex">
+                    <p style="margin-right: 1%">Точки: </p> <p id="marks"></p>
+                </div>
+
+                <div class="uk-flex">
+                    <p style="margin-right: 1%">Время: </p> <p id="time_html"></p>
+                </div>
+
+                <div class="uk-flex">
+                    <p style="margin-right: 1%">Расстояние: </p> <p id="distance_html"></p>
+                </div>
+            </div>
+        </div>
+
+                <!-- This is a button toggling the modal with the default close button -->
+        <button style="background-color: white; border: 0; border-radius: 0.5em; font-size: 1em; height: 4vh" type="button" uk-toggle="target: #modal-close-default">Просмотреть прошлые маршруты</button>
+
+        <!-- This is the modal with the default close button -->
+        <div id="modal-close-default" uk-modal>
+            <div class="uk-modal-dialog uk-modal-body" style="width: 80%;">
+                <button class="uk-modal-close-default" type="button" uk-close></button>
+                <div style="margin: 5px">
+                    <p style="font-size: 1.1em;">Ваши прошлые маршруты:</p>
+                    <table class="uk-table uk-table-justify uk-table-divider">
+                        <thead>
+                            <tr>
+                                <th class="uk-width-small">ID Маршрута</th>
+                                <th>Точки</th>
+                                <th>Время</th>
+                                <th>Расстояние</th>
+                                <th>Выбрать этот маршрут</th>
+
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr>
+                                <td>0</td>
+                                <td>Павилион №2 Робостанция, Павилион №10 Молдова</td>
+                                <td>6 мин</td>
+                                <td>520 м</td>
+                                <td><input class="oldRoutes" type="checkbox"></td>
+                            </tr>
+
+                            <tr>
+                                <td>1</td>
+                                <td>Павильон № 5 Музей городского хозяйства Москвы, Павильон №6 «Абхазия»</td>
+                                <td>7 мин</td>
+                                <td>560 м</td>
+                                <td><input class="oldRoutes" type="checkbox"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
+
 </div>
+
 </body>
 
 <script>
@@ -90,6 +147,8 @@ ymaps.ready(init);
         {% endfor %}
 
     ]    
+
+
 
     // проверка чекбоксов, чтобы определить выбранные для посещения достопримечательности (возвращает список из id чекбоксов)
     function checking_checkbox() {
@@ -170,14 +229,22 @@ ymaps.ready(init);
         }
     });
 
+
     // построение маршрута и получение информации
     get_route.events.add('click', function () {
+
         var a = checking_checkbox()
         var b = getting_places_names(a)
         // j - список координат
         var j = getting_coordinates(b, places_bd)
+        var all = [[55.828693, 37.633724]]
+        for (i = 0; i< j.length; i++) {
+            all.push(j[i])
+        }
+
         document.getElementById('marks').innerHTML = b
-        multiRoute.model.setReferencePoints(j);
+
+        multiRoute.model.setReferencePoints(all);
 
         multiRoute.model.events.add('requestsuccess', function() {
         var activeRoute = multiRoute.getActiveRoute();
@@ -196,9 +263,6 @@ ymaps.ready(init);
         console.log("Время прохождения: " + activeRoute.properties.get("duration").text);
 
         // save to database
-
-
-
         $.ajax({
 
                 type: "POST",
@@ -221,12 +285,58 @@ ymaps.ready(init);
 
     });});
 
+    var get_old_route = new ymaps.control.Button({
+        data: {content: "Построить старый маршрут"},
+        options: {selectOnClick: true,
+            position: {top: '200px', right: '275px'}
+        }
+    });
+    
+    var saved = [
+        {
+
+        }
+    ]
+
+    function old_routes () {
+        var f = document.getElementsByClassName('oldRoutes')
+        var id_old = []
+        for (i=0; i < f.length; i++) {
+            id_old.push(i)
+        }
+    }
+
+    // тут должны быть функция которая берет то, что возвращает old routes и ищет по этому айди в бд сохранненый маршрут и его координаты
+    function old_coordinates () {
+
+    }
+    
+    // построение маршрута и получение информации (points - координаты получаенные из old_coordinates)
+    get_old_route.events.add('click', function (points) {
+
+        old_Route = new ymaps.multiRouter.MultiRoute({
+            referencePoints: points,
+            params: {
+                //Тип маршрутизации - пешеходная маршрутизация.
+                routingMode: 'pedestrian'
+            }
+        }, {
+            // Автоматически устанавливать границы карты так, чтобы маршрут был виден целиком.
+            boundsAutoApply: true
+        });
+
+        
+
+        myMap.geoObjects.add(old_Route);
+    });
+
+
 
     // создание карты
     var myMap = new ymaps.Map('map', {
         center: [55.739625, 37.54120],
         zoom: 12,
-        controls: [get_route]
+        controls: [get_route, get_old_route]
     }, {
         buttonMaxWidth: 300
     });
@@ -244,7 +354,6 @@ ymaps.ready(init);
             iconColor: '#0095b6'
         }))    
     }
-
 
 }
     
