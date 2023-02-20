@@ -8,3 +8,10 @@ def index_page(request):
     content['places'] = [place for place in places]
 
     return render(request, 'index.html', content)
+
+
+def save_page(request):
+    if request.method == 'POST':
+        print(request.POST)
+        return 
+    # return JsonResponce()

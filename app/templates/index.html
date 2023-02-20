@@ -15,6 +15,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.15.24/dist/css/uikit.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/uikit@3.15.24/dist/js/uikit.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/uikit@3.15.24/dist/js/uikit-icons.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+
     <style type="text/css">
         html, body{
             width: 100%; padding: 0; margin: 0;
@@ -188,8 +190,37 @@ ymaps.ready(init);
         var route_duration = activeRoute.properties.get("duration").text
         document.getElementById("time_html").innerHTML = route_duration
 
+        console.log("Места: " + b)
+
         console.log("Длина: " + activeRoute.properties.get("distance").text);
         console.log("Время прохождения: " + activeRoute.properties.get("duration").text);
+
+        // save to database
+
+        const csrftoken = getCookie('csrftoken');
+
+
+        $.ajax({
+                headers: {
+                            'X-CSRFToken': csrftoken
+                        },
+                type: "POST",
+                url: "/save",
+                data:{
+                    points: b,
+                    time: activeRoute.properties.get("distance").text,
+                    distance: activeRoute.properties.get("duration").text,
+                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+                },
+                success: function(){
+                    // alert('Save Data');
+                    // $('#firstname').val('');
+                    // $('#lastname').val('');
+                    // $('#address').val('');
+                    // $('#username').val('');
+                    // window.location = "/";
+                }
+            });
 
     });});
 
@@ -216,10 +247,6 @@ ymaps.ready(init);
             iconColor: '#0095b6'
         }))    
     }
-
-     
-
-        
 
 
 }
