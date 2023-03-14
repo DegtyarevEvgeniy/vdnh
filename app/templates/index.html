@@ -268,6 +268,7 @@ ymaps.ready(init);
                     points: b,
                     time: activeRoute.properties.get("distance").text,
                     distance: activeRoute.properties.get("duration").text,
+                    coordinates: j,
                     csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
                 },
                 success: function(){

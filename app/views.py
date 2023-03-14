@@ -18,12 +18,21 @@ def index_page(request):
 
 
 def save_page(request):
-    print("POST:", request.POST)
     if request.method == "POST":
+        print("POST:", request.POST)
+        f = dict(request.POST)
+
+        s = ''
+        for i in f:
+            if 'coordinates' in i:
+                s+=str(f[i])
+
+
         history = History.objects.create(
-            points = request.POST.get('points[]'),
+            points = f['points[]'],
             time = request.POST.get('time'),
             distance = request.POST.get('distance'),
+            coordinates = s,
         )
         history.save()
     # print("BODY:", json.loads(request.body))
