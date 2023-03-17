@@ -108,7 +108,7 @@
                                 <td>{{item.points}}</td>
                                 <td>{{item.time}}</td>
                                 <td>{{item.distance}}</td>
-                                <td><button type="button" onclick="" uk-close></td>
+                                <td><label><input class="uk-radio" class="oldRoutes"  type="radio" name="radio"></label></td>
                             </tr>
 
 
@@ -142,8 +142,24 @@ ymaps.ready(init);
 
         }, 
         {% endfor %}
+    ]
+    
+    var places_bd = [
 
-    ]    
+{% for place in places %}
+
+{
+    center: [{{ place.coordinates }}],
+    name: "{{ place.name }}"
+
+}, 
+
+{% endfor %}
+]
+
+        
+
+
 
 
 
@@ -238,6 +254,8 @@ ymaps.ready(init);
         for (i = 0; i< j.length; i++) {
             all.push(j[i])
         }
+    
+        
 
         document.getElementById('marks').innerHTML = b
 
@@ -289,12 +307,19 @@ ymaps.ready(init);
             position: {top: '200px', right: '275px'}
         }
     });
-    
-    var saved = [
-        {
 
-        }
-    ]
+
+    // var saved = [
+
+    //     {% for item in items %}
+
+    //         console.log(item)
+
+    //     {% endfor %}
+    // ]
+
+
+    
 
     function old_routes () {
         var f = document.getElementsByClassName('oldRoutes')
@@ -302,12 +327,21 @@ ymaps.ready(init);
         for (i=0; i < f.length; i++) {
             id_old.push(i)
         }
+        return id_old
     }
 
-    // тут должны быть функция которая берет то, что возвращает old routes и ищет по этому айди в бд сохранненый маршрут и его координаты
-    function old_coordinates () {
+    // // тут должны быть функция которая берет то, что возвращает old routes и ищет по этому айди в бд сохранненый маршрут и его координаты
+    // function old_coordinates () {
+    //     var x = old_routes()
+    //     for (i=0; i < x.length; i++) {
+    //         if (x[i].checked) {
+    //             var ch = i
+    //         }
+    //     }
 
-    }
+    //     var cor = saved[i].coordinates
+        
+    // }
     
     // построение маршрута и получение информации (points - координаты получаенные из old_coordinates)
     get_old_route.events.add('click', function (points) {
@@ -325,7 +359,6 @@ ymaps.ready(init);
 
         
 
-        myMap.geoObjects.add(old_Route);
     });
 
 
@@ -341,6 +374,7 @@ ymaps.ready(init);
 
     // размещение маршрута на карте
     myMap.geoObjects.add(multiRoute);
+    myMap.geoObjects.add(old_Route);
 
     // размещение меток достопримечательностей
     for (i = 0; i < places_bd.length; i++) {
