@@ -25,11 +25,27 @@ def save_page(request):
         s = ''
         for i in f:
             if 'coordinates' in i:
-                s+=str(f[i])
+                s+=str(f[i])+','
+        s = s.replace("'", "")
+        print('----------------------')
+
+        print(s.replace("'", ""))
+
+        print('----------------------')
+
+        r = ''
+        for i in f:
+            if "points" in i:
+                r+=str(f[i])
+        r = r.replace("'", "")
+        r = r.replace("[", "")
+        r = r.replace("]", "")
+
+        print(r)
 
 
         history = History.objects.create(
-            points = f['points[]'],
+            points = r,
             time = request.POST.get('time'),
             distance = request.POST.get('distance'),
             coordinates = s,

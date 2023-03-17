@@ -309,14 +309,27 @@ ymaps.ready(init);
     });
 
 
-    // var saved = [
+    var saved = [
 
-    //     {% for item in items %}
+        {% for item in items %}
 
-    //         console.log(item)
 
-    //     {% endfor %}
-    // ]
+        // console.log(  "{{ item.points }}" )
+
+        // console.log( "--------------------")
+
+        // console.log( "{{ item.coordinates }}")
+
+        {
+            center: [{{ item.coordinates }}],
+            name: "{{ item.points }}"
+
+        }, 
+
+
+        {% endfor %}
+
+    ]
 
 
     
