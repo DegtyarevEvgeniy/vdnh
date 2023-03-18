@@ -53,7 +53,7 @@
         <div style="width: 30%">
             <div>
                 <button href="#" style="background-color: white; border-radius: 0.5em; width: 90%; height: 4vh; border: 0px;">Нажмите, чтобы выбрать точки</button>
-                <div id="options" class="uk-dropbar uk-dropbar-top uk-flex-column" uk-drop=" mode: click" style="width:30%; height: 60vh">
+                <div id="options" class="uk-dropbar uk-dropbar-top uk-flex-column" uk-drop=" mode: click" style="width:30%; height: 80vh">
                     {% for place in places %}
                         <label style="display: block; font-size: 1em"><input class="Check" type="checkbox">{{ place.name }}</label>
                     {% endfor %}
@@ -103,10 +103,9 @@
                     <table class="uk-table uk-table-justify uk-table-divider">
                         <thead>
                             <tr>
-                                <th class="uk-width-small">ID Маршрута</th>
                                 <th>Точки</th>
-                                <th>Время</th>
                                 <th>Расстояние</th>
+                                <th>Время</th>
                                 <th>Выбрать этот маршрут</th>
 
                             </tr>
@@ -115,7 +114,6 @@
                         <tbody>
                             {% for item in items %}
                             <tr>
-                                <td>{{item.id}}</td>
                                 <td>{{item.points}}</td>
                                 <td>{{item.time}}</td>
                                 <td>{{item.distance}}</td>
@@ -339,22 +337,20 @@
     get_old_route.events.add('click', function () {
         var l = old_routes()
         var coordinates = saved[i].center
-
-        console.log(coordinates)
+        var text = saved[i].name
         multiRoute.model.setReferencePoints(coordinates);
 
-        // document.getElementById('marks').innerHTML = b
+        document.getElementById('marks').innerHTML = text
 
-        // multiRoute.model.events.add('requestsuccess', function() {
-        // var activeRoute1 = multiRoute.getActiveRoute1();
+        // время пути
+        var route_distance = multiRoute.properties.get("distance").text
+        console.log(route_distance)
+        document.getElementById("distance_html").innerHTML = route_distance 
+        
+        // дистанция
+        var route_duration = multiRoute.properties.get("duration").text
+        document.getElementById("time_html").innerHTML = route_duration
 
-        // // время пути
-        // var route_distance1 = activeRoute.properties.get("distance").text
-        // document.getElementById("distance_html").innerHTML = route_distance1
-
-        // // дистанция
-        // var route_duration1 = activeRoute.properties.get("duration").text
-        // document.getElementById("time_html").innerHTML = route_duration1
 
 })
 
@@ -435,17 +431,18 @@
         objectsInsideCircle.each(function (x) {
             coorTime.push(x.geometry.getBounds())
         })
+        console.log(coorTime)
 
         objectsInsideCircle.setOptions('preset', 'islands#redIcon');
         // Оставшиеся объекты - синими.
-        console.log(coorTime)
+
+        var ok = []
         for (i=0; i < coorTime.length; i++) {
-            console.log(coorTime[i][0], 'y')
-            
             for (x=0; x < places_bd.length; i++) {
                 console.log(places_bd[x].center, 'l')
-                if (coorTime[i][0] == places_bd[x].center) {
-                    console.log('0')
+                if (coorTime[i][0][0] == places_bd[x].center[0] & coorTime[i][0][0] == places_bd[x].center[1]) {
+                    console.log('yhhh')
+                    ok.push(places_bd[x].name)  
                 }
             }
         }
