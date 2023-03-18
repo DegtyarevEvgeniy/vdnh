@@ -78,10 +78,21 @@
                     <p style="margin-right: 1%">Расстояние: </p> <p id="distance_html"></p>
                 </div>
             </div>
+
+            <div class="margn-left: 2%">
+                <p>Определить точки по времени:</p>
+                <label><input class="time_check" type="radio" name="radio2"> 5 мин</label>
+                <label><input class="time_check" type="radio" name="radio2"> 10 мин</label>
+                <label><input class="time_check" type="radio" name="radio2"> 15 мин</label>
+                <label><input class="time_check" type="radio" name="radio2"> 25 мин</label>
+                <label><input class="time_check" type="radio" name="radio2"> 30 мин</label>
+                <br>
+                <br>
+            </div>
         </div>
 
                 <!-- This is a button toggling the modal with the default close button -->
-        <button style="background-color: white; border: 0; border-radius: 0.5em; font-size: 1em; height: 4vh" type="button" uk-toggle="target: #modal-close-default">Просмотреть прошлые маршруты</button>
+        <button class="uk-margin-top" style="background-color: white; border: 0; border-radius: 0.5em; font-size: 1em; height: 4vh" type="button" uk-toggle="target: #modal-close-default">Просмотреть прошлые маршруты</button>
 
         <!-- This is the modal with the default close button -->
         <div id="modal-close-default" uk-modal>
@@ -128,7 +139,6 @@
 
 <script>
 
-ymaps.ready(init);
 
     function init() {
 
@@ -144,24 +154,6 @@ ymaps.ready(init);
         {% endfor %}
     ]
     
-    var places_bd = [
-
-{% for place in places %}
-
-{
-    center: [{{ place.coordinates }}],
-    name: "{{ place.name }}"
-
-}, 
-
-{% endfor %}
-]
-
-        
-
-
-
-
 
     // проверка чекбоксов, чтобы определить выбранные для посещения достопримечательности (возвращает список из id чекбоксов)
     function checking_checkbox() {
@@ -304,7 +296,7 @@ ymaps.ready(init);
     var get_old_route = new ymaps.control.Button({
         data: {content: "Построить старый маршрут"},
         options: {selectOnClick: true,
-            position: {top: '200px', right: '275px'}
+            position: {top: '100px', left: '10px'}
         }
     });
 
@@ -330,9 +322,8 @@ ymaps.ready(init);
         {% endfor %}
 
     ]
+    console.log(saved)
 
-
-    
 
     function old_routes () {
         var f = document.getElementsByClassName('oldRoutes')
@@ -343,63 +334,142 @@ ymaps.ready(init);
         return id_old
     }
 
-    // // тут должны быть функция которая берет то, что возвращает old routes и ищет по этому айди в бд сохранненый маршрут и его координаты
-    // function old_coordinates () {
-    //     var x = old_routes()
-    //     for (i=0; i < x.length; i++) {
-    //         if (x[i].checked) {
-    //             var ch = i
-    //         }
-    //     }
 
-    //     var cor = saved[i].coordinates
-        
-    // }
-    
-    // построение маршрута и получение информации (points - координаты получаенные из old_coordinates)
-    get_old_route.events.add('click', function (points) {
+    // построение маршрута и получение информации
+    get_old_route.events.add('click', function () {
+        var l = old_routes()
+        var coordinates = saved[i].center
 
-        old_Route = new ymaps.multiRouter.MultiRoute({
-            referencePoints: points,
-            params: {
-                //Тип маршрутизации - пешеходная маршрутизация.
-                routingMode: 'pedestrian'
-            }
-        }, {
-            // Автоматически устанавливать границы карты так, чтобы маршрут был виден целиком.
-            boundsAutoApply: true
-        });
+        console.log(coordinates)
+        multiRoute.model.setReferencePoints(coordinates);
 
-        
+        // document.getElementById('marks').innerHTML = b
 
+        // multiRoute.model.events.add('requestsuccess', function() {
+        // var activeRoute1 = multiRoute.getActiveRoute1();
+
+        // // время пути
+        // var route_distance1 = activeRoute.properties.get("distance").text
+        // document.getElementById("distance_html").innerHTML = route_distance1
+
+        // // дистанция
+        // var route_duration1 = activeRoute.properties.get("duration").text
+        // document.getElementById("time_html").innerHTML = route_duration1
+
+})
+
+    var time_set = [300, 700]
+
+    var get_time_route = new ymaps.control.Button({
+        data: {content: "Показать облаcть и подходящие точки"},
+        options: {selectOnClick: true,
+            position: {top: '150px', left: '10px' }
+        }
     });
 
 
+    get_time_route.events.add('dblclick', function(e) {
+        var thisPlacemark = e.get('target');
+        myCollection.remove(thisPlacemark);
+    });
 
     // создание карты
     var myMap = new ymaps.Map('map', {
         center: [55.739625, 37.54120],
-        zoom: 12,
-        controls: [get_route, get_old_route]
+        zoom: 1,
+        controls: [get_route, get_old_route, get_time_route]
     }, {
         buttonMaxWidth: 300
     });
 
-    // размещение маршрута на карте
+    var objects = []
+    var objects_names = []
+
+    for (i = 0; i < places_bd.length; i++) {
+        myPlacemark = new ymaps.Placemark(places_bd[i].center, {
+            balloonContentBody: places_bd[i].name,
+        });
+
+        objects.push(myPlacemark)
+        objects_names.push(places_bd[i].name)
+
+
+        ymaps.geoQuery(myPlacemark).addToMap(myMap)
+
+
+
+    }
+
+    var objects_n = ymaps.geoQuery(objects)
+
+
+
+
+
+
+
+    get_time_route.events.add('click', function () {
+    var s = document.getElementsByClassName('time_check')
+
+        for (i = 0; i < s.length; i++) {
+            if (s[i].checked) {
+                var p = i
+            }
+        }  
+
+        console.log(p)
+        
+        var time = time_set[p]
+        var circle = new ymaps.Circle([[55.828693, 37.633724], time], {}, {
+        geodesic: true  
+        });
+
+        ymaps.geoQuery(circle).remove(myMap)
+        ymaps.geoQuery(circle).addToMap(myMap)
+    
+
+        circle.events.add('click', function () {
+        // Объекты, попадающие в круг, будут становиться красными.
+        var objectsInsideCircle = objects_n.searchInside(circle);
+        var coorTime = []
+        objectsInsideCircle.each(function (x) {
+            coorTime.push(x.geometry.getBounds())
+        })
+
+        objectsInsideCircle.setOptions('preset', 'islands#redIcon');
+        // Оставшиеся объекты - синими.
+        console.log(coorTime)
+        for (i=0; i < coorTime.length; i++) {
+            console.log(coorTime[i][0], 'y')
+            
+            for (x=0; x < places_bd.length; i++) {
+                console.log(places_bd[x].center, 'l')
+                if (coorTime[i][0] == places_bd[x].center) {
+                    console.log('0')
+                }
+            }
+        }
+
+
+    });
+
+        
+    })
+
+
+
+
+
+
+
+
+
+// Добавляем круг на карту.
+
     myMap.geoObjects.add(multiRoute);
     myMap.geoObjects.add(old_Route);
 
-    // размещение меток достопримечательностей
-    for (i = 0; i < places_bd.length; i++) {
-        myMap.geoObjects
-        .add(new ymaps.Placemark(places_bd[i].center, {
-            balloonContent: places_bd[i].name
-        }, {
-            preset: 'islands#icon',
-            iconColor: '#0095b6'
-        }))    
-    }
-
+    
 }
     
 
